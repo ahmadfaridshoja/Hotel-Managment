@@ -16,32 +16,41 @@ public class ReservationServiceImpl implements ReservationService {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @Autowired
+    private ReservationMapper reservationMapper; // Inject ReservationMapper as an instance
+
     @Override
     public ReservationDto createReservation(ReservationDto reservationDto) {
-        return ReservationMapper.toDto(reservationRepository.save(ReservationMapper.toEntity(reservationDto)));
+        // Using instance method of reservationMapper
+        return reservationMapper.toDto(reservationRepository.save(reservationMapper.toEntity(reservationDto)));
     }
 
     @Override
     public ReservationDto getReservationById(Long id) {
+        // Using instance method of reservationMapper
         return reservationRepository.findById(id)
-                .map(ReservationMapper::toDto)
+                .map(reservation -> reservationMapper.toDto(reservation)) // Using instance method
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
     }
 
     @Override
     public List<ReservationDto> getAllReservations() {
+        // Using instance method of reservationMapper
         return reservationRepository.findAll().stream()
-                .map(ReservationMapper::toDto)
+                .map(reservation -> reservationMapper.toDto(reservation)) // Using instance method
                 .collect(Collectors.toList());
     }
 
     @Override
     public ReservationDto updateReservation(Long id, ReservationDto reservationDto) {
+        // Ensure the reservation exists before updating
         if (!reservationRepository.existsById(id)) {
             throw new RuntimeException("Reservation not found");
         }
         reservationDto.setId(id); // Ensure the reservation DTO contains the correct ID for update
-        return ReservationMapper.toDto(reservationRepository.save(ReservationMapper.toEntity(reservationDto)));
+
+        // Using instance method of reservationMapper
+        return reservationMapper.toDto(reservationRepository.save(reservationMapper.toEntity(reservationDto)));
     }
 
     @Override
